@@ -26,6 +26,9 @@ class CachedDict(object):
             if value is NoValue:
                 raise
             return value
+        except TypeError:
+            # Workaround for race condition w/ _cleanup()
+            return self._direct_cache[key]
 
     def __setitem__(self, key, value):
         raise NotImplementedError
@@ -36,38 +39,70 @@ class CachedDict(object):
     def __len__(self):
         if self._cache is None:
             self._populate()
-        return len(self._cache)
+        try:
+            return len(self._cache)
+        except TypeError:
+            # Workaround for race condition w/ _cleanup()
+            return len(self._direct_cache)
     
     def __contains__(self, key):
         self._populate()
-        return key in self._cache
+        try:
+            return key in self._cache
+        except TypeError:
+            # Workaround for race condition w/ _cleanup()
+            return key in self._direct_cache
 
     def __iter__(self):
         self._populate()
-        return iter(self._cache)
+        try:
+            return iter(self._cache)
+        except TypeError:
+            # Workaround for race condition w/ _cleanup()
+            return iter(self._direct_cache)
     
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.model.__name__)
 
     def iteritems(self):
         self._populate()
-        return self._cache.iteritems()
+        try:
+            return self._cache.iteritems()
+        except AttributeError:
+            # Workaround for race condition w/ _cleanup()
+            return self._direct_cache.iteritems()
     
     def itervalues(self):
         self._populate()
-        return self._cache.itervalues()
+        try:
+            return self._cache.itervalues()
+        except AttributeError:
+            # Workaround for race condition w/ _cleanup()
+            return self._direct_cache.itervalues()
     
     def iterkeys(self):
         self._populate()
-        return self._cache.iterkeys()
+        try:
+            return self._cache.iterkeys()
+        except AttributeError:
+            # Workaround for race condition w/ _cleanup()
+            return self._direct_cache.iterkeys()
     
     def items(self):
         self._populate()
-        return self._cache.items()
+        try:
+            return self._cache.items()
+        except AttributeError:
+            # Workaround for race condition w/ _cleanup()
+            return self._direct_cache.items()
         
     def get(self, key, default=None):
         self._populate()
-        return self._cache.get(key, default)
+        try:
+            return self._cache.get(key, default)
+        except AttributeError:
+            # Workaround for race condition w/ _cleanup()
+            return self._direct_cache.get(key, default)
     
     def pop(self, key, default=NoValue):
         value = self.get(key, default)
@@ -80,6 +115,10 @@ class CachedDict(object):
     def setdefault(self, key, value):
         if key not in self:
             self[key] = value
+
+    @property
+    def _direct_cache(self):
+        return self.cache.get(self.cache_key)
 
     def _populate(self, reset=False):
         if reset:
