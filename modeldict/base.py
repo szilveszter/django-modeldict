@@ -27,7 +27,9 @@ class CachedDict(object):
                 raise
             return value
         except TypeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return self._direct_cache[key]
 
     def __setitem__(self, key, value):
@@ -42,7 +44,9 @@ class CachedDict(object):
         try:
             return len(self._cache)
         except TypeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return len(self._direct_cache)
     
     def __contains__(self, key):
@@ -50,7 +54,9 @@ class CachedDict(object):
         try:
             return key in self._cache
         except TypeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return key in self._direct_cache
 
     def __iter__(self):
@@ -58,7 +64,9 @@ class CachedDict(object):
         try:
             return iter(self._cache)
         except TypeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return iter(self._direct_cache)
     
     def __repr__(self):
@@ -69,7 +77,9 @@ class CachedDict(object):
         try:
             return self._cache.iteritems()
         except AttributeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return self._direct_cache.iteritems()
     
     def itervalues(self):
@@ -77,7 +87,9 @@ class CachedDict(object):
         try:
             return self._cache.itervalues()
         except AttributeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return self._direct_cache.itervalues()
     
     def iterkeys(self):
@@ -85,7 +97,9 @@ class CachedDict(object):
         try:
             return self._cache.iterkeys()
         except AttributeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return self._direct_cache.iterkeys()
     
     def items(self):
@@ -93,7 +107,9 @@ class CachedDict(object):
         try:
             return self._cache.items()
         except AttributeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return self._direct_cache.items()
         
     def get(self, key, default=None):
@@ -101,7 +117,9 @@ class CachedDict(object):
         try:
             return self._cache.get(key, default)
         except AttributeError:
-            # Workaround for race condition w/ _cleanup()
+            # Workaround for race condition w/ _cleanup() and workaround
+            # for possible memcache failure by resetting from DB.
+            self._populate(reset=True)
             return self._direct_cache.get(key, default)
     
     def pop(self, key, default=NoValue):
